@@ -30,6 +30,9 @@ const GROUND_DEPTH = 18;                   // the skydiver lands this far in fro
 const T_GROUND = 40;                       // seconds after the jump when the ground comes into view
 const CLOUD_DRIFT = 0.12;                 // clouds are distant, so they drift up far slower than the skydiver falls
 const CHUTE_RANGE = [0.3, 0.8];           // the parachute opens between these fractions of the way down the sky panel (see planChuteY)
+// On wide screens the whole page is drawn at this size (like a 90% browser zoom),
+// and only smaller than this if it still doesn't fit the window
+const PAGE_SCALE = 0.9;
 const BUMP = { hold: 0.2, decay: 0.15, peak: 5, crash: 1000 };   // landing: the normal contact force is briefly 5 x weight (1000 x without a parachute), then settles back to the weight
 const CHUTE_MARGIN = 50;                  // clear space (canvas units) kept below the weight arrow while the parachute opens
 const NB = '\u00A0';                      // non-breaking space, so a value never gets split from its unit
@@ -1118,9 +1121,9 @@ function App() {
       if (inst) { inst.classList.remove('tall'); inst.style.zoom = ''; inst.style.width = ''; inst.style.flex = ''; }
       if (vw <= 900) { app.classList.remove('fit'); app.style.zoom = ''; app.style.height = ''; return; }
       app.classList.add('fit');
-      let z = 1;
+      let z = PAGE_SCALE;
       for (let i = 0; i < 5; i++) {
-        app.style.zoom = z === 1 ? '' : String(z);
+        app.style.zoom = String(z);
         app.style.height = vh / z + 'px';
         // how far the columns' contents run past the space they were given
         const over = Math.max(0, ...['.lab', '.sky'].map(q => { const e = app.querySelector(q); return e ? e.scrollHeight - e.clientHeight : 0; }));
