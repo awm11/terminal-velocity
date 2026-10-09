@@ -1,0 +1,274 @@
+/* Layout: a tall sky panel on the left that stays in view, with controls,
+   instruments, the walkthrough and the graph stacked beside it. */
+:root{
+  /* always the dark theme, whatever the device is set to */
+  --bg:#0f171c; --paper:#172229; --ink:#e4edf1; --muted:#9aabb5; --line:#2b3a43;
+  --accent:#5b9bf0; --accent-ink:#0b1620; --done:#58c08a;
+  --wt:#ff7a45; --air:#9d87ff; --nc:#58c08a; --needle:#ff6b5e;
+  color-scheme:dark;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px);background:#0f171c}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:#0f171c;color:var(--ink);font-family:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;font-size:16px;line-height:1.5}
+.app{max-width:1600px;margin:0 auto;padding:28px 24px 32px}
+
+/* Header */
+.top{position:relative;text-align:center}
+.title-block{max-width:720px;margin:0 auto}
+.top h1{font-family:"Bricolage Grotesque","Atkinson Hyperlegible",system-ui,sans-serif;font-weight:800;font-size:clamp(28px,4.2vw,46px);line-height:1.05;letter-spacing:-0.02em;margin:0 0 8px;text-wrap:balance}
+.lede{margin:0 auto 22px;color:var(--muted);font-size:18px;max-width:60ch}
+.favicon-link{position:absolute;top:0;right:10px;display:inline-block;line-height:0;transition:transform .2s ease}
+.favicon-link:hover,.favicon-link:focus-visible{transform:scale(1.15) rotate(10deg)}
+.favicon-img{width:72px;height:72px;display:block}
+
+/* Main grid */
+.layout{display:grid;grid-template-columns:clamp(300px,33%,440px) minmax(0,1fr);gap:22px;align-items:stretch}
+.sky{display:flex;flex-direction:column;min-width:0}
+.stage{position:relative;flex:1;min-height:420px;border-radius:14px;overflow:hidden;box-shadow:0 0 0 1px var(--line);background:#b9d7f0}
+.stage canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
+/* "Press Jump to leave the helicopter": --k turns canvas units into pixels (set by the app) */
+.jumphint{position:absolute;left:0;right:0;top:calc(var(--k,1) * 252px);text-align:center;font-weight:700;font-size:calc(var(--k,1) * 14px);line-height:1.5;color:#1b262e;text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 5px #fff;pointer-events:none}
+.hintjump{pointer-events:auto;font:inherit;font-weight:700;color:var(--accent-ink);background:var(--accent);border:1.5px solid var(--accent);border-radius:999px;padding:.1em .75em;margin:0 .1em;cursor:pointer;text-shadow:none}
+.hintjump:hover{filter:brightness(1.12)}
+.lab{min-width:0;display:flex;flex-direction:column;gap:14px}
+
+/* Controls (pills, speed group, switches) */
+.controls,.settings{display:flex;flex-wrap:wrap;gap:9px;align-items:center}
+.btn{white-space:nowrap;font:inherit;font-weight:700;font-size:14.5px;padding:8px 14px;border-radius:999px;border:1.5px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer}
+.btn:hover:not(:disabled){border-color:var(--accent)}
+.btn:disabled{opacity:.55;cursor:default}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);min-width:78px}
+.btn.ghost{background:transparent}
+.pausebtn{display:inline-flex;align-items:center;justify-content:center;gap:7px}
+.pausebtn svg{width:11px;height:11px}
+.pausebtn.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+button:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.speed{display:flex;align-items:center;gap:1px;padding:2px;border:1.5px solid var(--line);border-radius:999px;background:var(--paper)}
+.speedlbl{font-size:14.5px;font-weight:700;padding-left:5px;padding-right:3px;white-space:nowrap}
+.seg{font:inherit;font-weight:700;font-size:14px;border:0;background:transparent;color:var(--ink);padding:6px 8px;border-radius:999px;cursor:pointer;font-variant-numeric:tabular-nums}
+.seg.on{background:var(--ink);color:var(--paper)}
+.seg.pause{display:inline-grid;place-items:center;width:34px;height:30px;padding:0;margin-right:4px}
+.seg.pause svg{width:11px;height:11px}
+.seg.pause.on{background:var(--accent);color:var(--accent-ink)}
+.swgroup{display:flex;align-items:center;gap:6px;font:inherit;font-weight:700;font-size:14px;color:var(--ink);cursor:pointer;white-space:nowrap;padding:0 4px}
+.insw{position:relative;display:inline-block;width:32px;height:20px;flex:none}
+.insw input{position:absolute;inset:0;margin:0;opacity:0;cursor:pointer}
+.insw .track{position:absolute;inset:0;background:var(--line);border-radius:999px;pointer-events:none;transition:background .15s}
+.insw .track::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:var(--paper);box-shadow:0 1px 2px rgba(0,0,0,.35);transition:transform .15s}
+.insw input:checked ~ .track{background:var(--accent)}
+.insw input:checked ~ .track::after{transform:translateX(12px)}
+.insw input:focus-visible ~ .track{outline:3px solid var(--accent);outline-offset:2px}
+.slider{display:flex;align-items:center;gap:10px;padding:5px 14px;border:1.5px solid var(--line);border-radius:999px;background:var(--paper);font-weight:700;font-size:14.5px;cursor:pointer;min-width:0}
+.slider input{width:150px;min-width:0;accent-color:var(--accent);cursor:pointer}
+.slider output{min-width:52px;text-align:right;font-variant-numeric:tabular-nums}
+.adv .settings{flex-direction:column;align-items:stretch;margin-top:10px}
+.settings[hidden]{display:none}
+.adv-lab{display:none}
+.adv-lab .advtoggle{margin-top:0}
+.advtoggle{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;margin-top:12px;padding:8px 14px;font:inherit;font-weight:700;font-size:14.5px;color:var(--ink);background:var(--paper);border:1.5px solid var(--line);border-radius:999px;cursor:pointer}
+.advtoggle:hover{border-color:var(--accent)}
+.advtoggle svg{width:13px;height:13px;flex:none}
+.adv .slider input{flex:1;width:auto}
+.adv .slider > span{min-width:96px}
+
+/* Instruments row */
+.instruments{display:grid;grid-template-columns:minmax(0,600px) minmax(400px,1fr);gap:14px;align-items:stretch}
+.fig{margin:0;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px 18px 14px;min-width:0}
+.fig h2{font-family:"Bricolage Grotesque","Atkinson Hyperlegible",system-ui,sans-serif;font-weight:600;font-size:20px;letter-spacing:-0.01em;margin:0 0 6px}
+.gauges{display:grid;grid-template-columns:minmax(130px,1fr) fit-content(300px);gap:16px;align-items:center;padding:14px 20px}
+.meter{display:block;width:100%;max-width:260px;height:auto;margin:0 auto}
+.meter .dial{fill:none;stroke:var(--line);stroke-width:2}
+.meter .tk{stroke:var(--ink);stroke-width:1}
+.meter .tk.major{stroke-width:2}
+.meter .dlab{fill:var(--ink);font-size:12px;font-weight:700}
+.meter .needle{stroke:var(--needle);stroke-width:3;stroke-linecap:round}
+.meter .hub{fill:var(--ink)}
+.meter .dval{fill:var(--ink);font-family:"Bricolage Grotesque","Atkinson Hyperlegible",system-ui,sans-serif;font-weight:800;font-size:26px;font-variant-numeric:tabular-nums}
+.meter .dunit{fill:var(--muted);font-size:12.5px;font-weight:700}
+.meter .dsub{fill:var(--muted);font-size:12px}
+.readouts{margin:0;min-width:0}
+.rrow{display:flex;justify-content:space-between;align-items:baseline;gap:.6em;padding:7px 0;border-bottom:1px solid var(--line)}
+.rrow:last-child{border-bottom:0}
+.rrow.sizer{visibility:hidden;height:0;padding:0;border:0;overflow:hidden}
+.rrow dt{display:flex;align-items:center;gap:.45em;color:var(--muted);font-size:.875em;white-space:nowrap}
+.rrow dd{margin:0;text-align:right;white-space:nowrap}
+.rrow dd b{font-size:.97em;font-variant-numeric:tabular-nums}
+.rrow dd small{display:block;font-size:.75em;line-height:1.2;color:var(--muted)}
+/* small vertical arrows matching the force arrows: weight points down, the others up */
+.fsw{flex:none;width:4px;height:12px;border-radius:2px;position:relative;margin:0 5px}
+.fsw::after{content:'';position:absolute;left:-4px;border:6px solid transparent}
+.fsw.w{margin-bottom:6px}
+.fsw.w::after{top:100%;margin-top:-2px;border-top-color:inherit;border-bottom:0}
+.fsw.n,.fsw.air{margin-top:6px}
+.fsw.n::after,.fsw.air::after{bottom:100%;margin-bottom:-2px;border-bottom-color:inherit;border-top:0}
+.fsw.w{background:var(--wt);border-color:var(--wt)}
+.fsw.n{background:var(--nc);border-color:var(--nc)}
+.fsw.air{background:var(--air);border-color:var(--air)}
+
+/* The big red button */
+.chutefig{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:18px 8px 14px;min-width:0}
+.chute-ring{width:130px;height:130px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 50% 35%,#4a5158,#24292e);box-shadow:inset 0 2px 3px rgba(255,255,255,.12),0 4px 12px rgba(0,0,0,.2)}
+.chute-btn{width:104px;height:104px;border-radius:50%;border:0;padding:0;cursor:pointer;color:#fff;font-family:"Bricolage Grotesque","Atkinson Hyperlegible",system-ui,sans-serif;font-weight:800;font-size:14px;letter-spacing:.05em;text-transform:uppercase;background:radial-gradient(circle at 38% 30%,#ff8a7a 0%,#e5392c 40%,#b5231a 78%,#8e1912 100%);box-shadow:0 7px 0 #6c140e,0 11px 16px rgba(0,0,0,.35),inset 0 -5px 10px rgba(0,0,0,.18);transform:translateY(-5px);transition:transform .08s ease,box-shadow .08s ease,filter .2s;text-shadow:0 1px 2px rgba(0,0,0,.35)}
+.chute-btn:active:not(:disabled),.chute-btn.pressed{transform:translateY(1px);box-shadow:0 1px 0 #6c140e,0 3px 6px rgba(0,0,0,.3),inset 0 -3px 8px rgba(0,0,0,.25)}
+.chute-btn:disabled{cursor:default}
+.chute-btn.pulse{animation:chutePulse 1.1s ease-in-out infinite}
+.chute-btn:focus-visible{outline:3px solid var(--accent);outline-offset:5px}
+@keyframes chutePulse{
+  0%,100%{box-shadow:0 7px 0 #6c140e,0 11px 16px rgba(0,0,0,.35),0 0 0 0 rgba(229,57,44,.6)}
+  50%{box-shadow:0 7px 0 #6c140e,0 11px 16px rgba(0,0,0,.35),0 0 0 16px rgba(229,57,44,0)}
+}
+.chute-btn.armed{animation:chuteFlash .5s steps(1,end) infinite;cursor:default}
+@keyframes chuteFlash{50%{filter:brightness(1.45) saturate(1.2)}}
+@media (prefers-reduced-motion: reduce){.chute-btn.pulse{animation:none}.chute-btn.armed{animation:none;filter:brightness(1.3)}}
+.chute-cap{margin:0;font-size:14px;color:var(--muted);font-weight:700;text-align:center}
+
+/* What's happening: steps and the walkthrough */
+.story{display:grid;grid-template-columns:minmax(200px,1fr) minmax(0,34em);gap:22px;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:20px 22px}
+.steps{list-style:none;margin:0;padding:0;columns:2 200px;column-gap:20px}
+.steps li{break-inside:avoid;margin-bottom:9px}
+.steps li{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:15px}
+.steps .num{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:13px;border:1.5px solid var(--line)}
+.steps li.now{color:var(--ink);font-weight:700}
+.steps li.now .num{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.steps li.done .num{background:var(--done);border-color:var(--done);color:#fff}
+.steplink{display:flex;align-items:center;gap:10px;font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;text-align:left}
+.steplink:hover{color:var(--ink)}
+.walktip{margin-right:auto;align-self:center;color:var(--muted);font-size:14px}
+.tgraph .marker.pick{cursor:pointer}
+.tgraph .marker.pick:hover circle{stroke:var(--accent);stroke-width:2.5}
+.tgraph .marker.pick:focus-visible{outline:none}
+.tgraph .marker.pick:focus-visible circle{stroke:var(--accent);stroke-width:3}
+.tgraph .marker.sel circle{fill:var(--accent);stroke:var(--accent)}
+.tgraph .marker.sel text{fill:var(--accent-ink)}
+.explain{min-width:0;display:flex;flex-direction:column}
+.explain h3{font-family:"Bricolage Grotesque","Atkinson Hyperlegible",system-ui,sans-serif;font-weight:600;font-size:20px;letter-spacing:-0.01em;margin:0 0 6px}
+.explain p{margin:0 0 10px;max-width:62ch}
+.stepcount{font-size:13px;font-weight:700;color:var(--accent);letter-spacing:.02em;margin-bottom:4px}
+.expstack{display:grid}
+.expstack > .exp{grid-area:1 / 1}
+.exp.ghost{visibility:hidden}
+.walkfoot{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:9px;margin-top:auto;padding-top:6px}
+
+/* Values and equations in the explanation */
+.chip{display:inline-block;white-space:nowrap;padding:0 .4em;margin:0 .05em;border-radius:7px;background:rgba(91,155,240,.16);border:1px solid rgba(91,155,240,.5);font-weight:700;font-variant-numeric:tabular-nums;line-height:1.35}
+.chip.eq{display:inline;white-space:normal;padding:.05em .4em;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+/* The explanation panel can be minimised, like the graph */
+.storyfig .figbody{margin-top:12px}
+.storyfig .story{background:none;border:0;border-radius:0;padding:0}
+/* Wide layout: the explanation sits beside the title row, not under it */
+@media (min-width:641px){
+  .storyfig:not(.min) .figbody{margin-top:-14px}
+  .storyfig .steps{margin-top:22px}
+  .storyfig .stepcount{padding-right:44px;margin-top:8px}
+}
+.headtools{display:flex;align-items:center;gap:10px}
+.btn.sm{padding:4px 12px;font-size:13.5px;min-width:0}
+/* "Open parachute" in the walkthrough hints at the big red button */
+.btn.chutego{background:radial-gradient(circle at 38% 30%,#ff8a7a 0%,#e5392c 45%,#b5231a 100%);border-color:#8e1912;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.35);box-shadow:0 3px 0 #6c140e}
+.btn.chutego:hover:not(:disabled){border-color:#ffb3a8}
+
+/* Graph panel */
+.fighead{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.fighead h2{margin:0}
+.fig.min{padding-top:12px;padding-bottom:12px}
+.figbody{margin-top:6px}
+.minbtn{display:inline-grid;place-items:center;width:32px;height:32px;padding:0;border-radius:8px;border:1.5px solid var(--line);background:transparent;color:var(--ink);cursor:pointer;flex:none}
+.minbtn:hover{border-color:var(--accent)}
+.minbtn svg{width:13px;height:13px}
+.tgraph{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:pan-y}
+.gwrap{position:relative;flex:1}
+.gwrap::before{content:"";display:block;padding-top:35.3%}   /* never shorter than the original shape */
+/* Fitted to the window (set by the app on wide screens): nothing scrolls */
+.app.fit{display:flex;flex-direction:column;overflow:hidden;padding-top:20px;padding-bottom:16px}
+.app.fit .layout{flex:1 1 0;min-height:0;grid-template-rows:minmax(0,1fr)}
+.app.fit .sky,.app.fit .lab{min-height:0}
+.app.fit .stage{min-height:260px}
+.app.fit .gwrap{min-height:170px}
+.app.fit .gwrap::before{display:none}
+.app.fit .bottom-block{margin-top:16px;flex:none}
+.app.fit .top{flex:none}
+.app.fit .graphfig.min{flex:none}
+.app.fit .lab:has(.graphfig.min) .instruments{flex:1 1 auto}   /* graph minimised: the instruments take the spare height */
+.graphfig{flex:1;display:flex;flex-direction:column}
+.graphfig.fig:not(.min) > .figbody{flex:1;display:flex;flex-direction:column}
+.tgraph .grid{stroke:var(--line);stroke-width:1}
+.tgraph .axis{stroke:var(--ink);stroke-width:1.5}
+.tgraph .tick{fill:var(--muted);font-size:11px}
+.tgraph .atitle{fill:var(--muted);font-size:11.5px}
+.tgraph .ev{stroke:var(--needle);stroke-width:1.2;stroke-dasharray:4 3}
+.tgraph .evl{fill:var(--needle);font-size:11px;font-weight:700}
+.tgraph .vline{fill:none;stroke:var(--accent);stroke-width:2.4;stroke-linejoin:round}
+.tgraph .vdot{fill:var(--accent);stroke:var(--paper);stroke-width:2}
+.tgraph .marker circle{fill:var(--paper);stroke:var(--ink);stroke-width:1.5}
+.tgraph .origin-arrow{pointer-events:none;user-select:none}
+.tgraph .origin-arrow line{stroke:var(--ink);stroke-width:1.5}
+.tgraph .origin-arrow polygon{fill:var(--ink)}
+.tgraph .marker text{fill:var(--ink);font-size:11px;font-weight:700}
+.tgraph .empty{fill:var(--muted);font-size:13px}
+.tgraph .cross{stroke:var(--ink);stroke-width:1;opacity:.5}
+.tgraph .tip .tipbg{fill:var(--paper);stroke:var(--line)}
+.tgraph .tip text{fill:var(--ink);font-size:11.5px}
+.tgraph .tip .tt{fill:var(--muted)}
+
+/* Footer and links */
+.foot p{margin:18px auto 0;max-width:min(100%,1100px);text-align:center;color:var(--muted);font-size:14px}
+.bottom-block{display:flex;align-items:center;justify-content:space-between;gap:24px;text-align:left;margin-top:28px;padding:0 140px}
+.more-left{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;flex:0 1 auto;min-width:0}
+.more-sims{display:inline-flex;align-items:center;gap:12px;font-weight:700;font-size:16px;color:var(--ink);text-decoration:none}
+.more-sims:hover,.more-sims:focus-visible{color:var(--accent)}
+.more-sims-icon{width:44px;height:44px;display:block;transition:transform .2s ease}
+.more-sims:hover .more-sims-icon,.more-sims:focus-visible .more-sims-icon{transform:scale(1.15) rotate(10deg)}
+.more-sims-note{margin:0;color:var(--muted);font-size:13px;max-width:440px;line-height:1.4}
+.side-below{display:none}
+.coffee-row{display:flex;justify-content:flex-end;flex:none}
+.coffee-embed-frame{display:inline-block;line-height:0;transition:transform .2s ease}
+.coffee-embed-frame:hover,.coffee-embed-frame:focus-within{transform:scale(1.08)}
+.coffee-embed{width:250px;height:60px;border:0;border-radius:10px;overflow:hidden}
+
+.iconbtn{display:inline-grid;place-items:center;width:38px;height:38px;padding:0;margin-left:auto}
+.iconbtn svg{width:28px;height:28px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+.instruments.stacked,.instruments.tall{grid-template-columns:minmax(0,1fr)}
+.instruments.stacked .deck,.instruments.tall .deck{order:-1}
+@media (max-width:1240px){
+  .instruments{grid-template-columns:minmax(0,1fr)}
+  .deck{order:-1}   /* controls first, then the speedometer and readouts */
+}
+@media (max-width:1100px){
+  .bottom-block{padding:0 48px}   /* less room to spare on smaller screens */
+}
+@media (max-width:900px){
+  .layout{grid-template-columns:1fr}
+  .sky{width:100%;max-width:440px;margin:0 auto}
+  .adv-sky{display:none}
+  .adv-lab{display:block}
+  .gauges{order:1}
+  .stage{flex:none;min-height:0;aspect-ratio:360/560}
+}
+@media (max-width:640px){
+  .bottom-block{flex-direction:column;align-items:stretch;padding:0 32px}
+  .coffee-row{justify-content:center}
+  .side-right{display:none}
+  .side-below{display:inline}
+  .app{padding:18px 16px 24px}
+  .favicon-img{width:52px;height:52px}
+  .top h1{padding:0 56px}
+  .story{grid-template-columns:1fr}
+  .iconbtn{display:none}
+  .slider{flex:1 1 100%}
+  .slider input{flex:1;width:auto}
+}
+@media (max-width:440px){
+  .instruments,.gauges{grid-template-columns:1fr}
+}
+
+/* Parachute card: the big button with the main controls beside it */
+.deck{position:relative;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:14px 20px;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px 16px 14px;min-width:0}
+.deck .chutefig{background:none;border:0;padding:0;gap:10px}
+.deck .controls{flex-direction:column;align-items:stretch;gap:12px}
+.pair{display:flex;gap:9px}
+.pair .btn{flex:1 1 auto;padding-left:12px;padding-right:12px;min-width:0}
+.deck .swgroup{justify-content:center}
+.top .iconbtn{position:absolute;top:4px;left:0;width:54px;height:54px;margin:0}
