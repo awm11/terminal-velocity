@@ -1284,7 +1284,7 @@ function App() {
     <div className="app" ref={appRef}>
       <header className="top">
         <FullscreenButton />
-        <a className="favicon-link" href="https://awm11.github.io/" target="_blank" rel="noopener noreferrer" aria-label="Visit awm11.github.io">
+        <a className="favicon-link" href="/" target="_blank" rel="noopener noreferrer" aria-label="Visit alexmoorephysics.com">
           <img src={`${import.meta.env.BASE_URL}favicon.svg`} alt="" className="favicon-img" />
         </a>
         <div className="title-block">
@@ -1394,7 +1394,7 @@ function App() {
 
       <div className="bottom-block">
         <div className="more-left">
-          <a className="more-sims" href="https://awm11.github.io/" target="_blank" rel="noopener noreferrer">
+          <a className="more-sims" href="/" target="_blank" rel="noopener noreferrer">
             <img src={`${import.meta.env.BASE_URL}favicon.svg`} alt="" className="more-sims-icon" />
             <span>See other simulations</span>
           </a>
